@@ -1,0 +1,233 @@
+---
+title: "LiveSessionUnit3"
+author: "Joshua Yi"
+date: "September 12, 2018"
+output: 
+  html_document:
+    keep_md: TRUE
+---
+
+# Q1: GitHub Cloning
+
+```{r Github, echo=TRUE}
+#$ cd 'E:\Documents\School\MSDS 6306\Unit 3'
+#$ git clone https://github.com/awesomedata/awesome-public-datasets.git
+
+```
+
+# Q2a-b: Data Summary 
+  * In R, please read in titanic.csv via either read.table() or read.csv(), assigning it to df.  This dataset follows the passengers aboard the Titanic, including their fees paid, rooms rented, and survivorship status.
+  * Output the respective count of females and males aboard the Titanic. Plot the frequency of females and males.  Be sure to give an accurate title and label the axes.
+
+```{r plot,echo=TRUE}
+# Calling in the data set from excel
+df <-read.csv(file="E:\\Documents\\School\\MSDS 6306\\Unit 3\\awesome-public-datasets\\Datasets\\titanic.csv",header =TRUE, sep=",")
+# plotting
+plot(df$Sex, main="Frequency of Females and Males", xlab = "Sex", ylab ="Count")
+```
+
+# Q2c: Data Summary
+  * Please use one apply function (to review: swirl() modules 11, 12) to output the means of Age, Fare, and Survival.  Make sure the output is a real number for all three means.
+
+```{r function, echo=TRUE}
+# creating mean function
+titanic.means <- function(my_vector){
+  # Sapply function to use vector for indexing on the dataframe
+  sapply(df[my_vector],mean,na.rm = TRUE)
+}
+# output
+titanic.means(c(2,6,10))
+```
+
+# Q3A: Function Building
+ * Create objects for the median Age, the minimum and maximum Duration of sleep, and the mean and standard deviation of the Rosenberg Self Esteem scale (RSES).  You may need to specify a few options like in Problem 2 and live session.
+
+```{r function pt2, echo=TRUE}
+# reading from excel file
+RSES <-read.csv(file="E:\\Documents\\School\\MSDS 6306\\Unit 3\\sleep_data_01.csv",header =TRUE, sep=",")
+# Creating function
+RSES.func <- function(x){
+  # sapply function to go through each column index and apply functions
+  age.mean <- mean(RSES$Age,na.rm = TRUE)
+  # min duration object
+  dur.min <- min(RSES$Duration, na.rm = TRUE)
+  # max duration object
+  dur.max <- max(RSES$Duration, na.rm =  TRUE)
+  # mean RSES object
+  RS.mean <- mean(RSES$RSES,na.rm = TRUE)
+  # SD RSES object
+  RS.sd <- sd(RSES$RSES,na.rm = TRUE)
+  return(
+    data.frame(
+      age.mean,
+      dur.min, 
+      dur.max,
+      RS.mean,
+      RS.sd
+    )
+  )
+}
+# mean age object
+RSES.func(x)
+```
+# Q3b: Function Building
+  * Create a data.frame object called report: it should consist of the median age, the RSES mean and standard deviation respectively divided by five (since there are five questions and these scores are summed), and the range of Duration (the statistical definition of range; it should be a single number.)
+
+```{r function pt3, echo=TRUE}
+# Creating function
+report <- function(x){
+  # age divide by 5
+  age.mean2 <- RSES.func()$age.mean/5
+  # RS mean divide by 5
+  RS.mean2 <- RSES.func()$RS.mean/5
+  # RS SD divide by 5
+  RS.sd2 <- RSES.func()$RS.sd/5
+  # range
+  Rng <- (RSES.func()$dur.max-RSES.func()$dur.min)
+  return(
+    data.frame(
+      age.mean2,
+      RS.mean2,
+      RS.sd2,
+      Rng
+    )
+  )
+}
+# output
+report(x)
+```
+# Q3c: Function Building
+  * Change the column names of this data.frame to MedianAge, SelfEsteem, SE_SD, and DurationRange.
+
+```{r function pt5, echo=TRUE}
+# create function
+col.name <- function(x){
+  # assign object for column name change
+  colnames(x) <- c("MedianAge","SelfEsteem","SE_SD","DurationRange")
+  return(x)
+}
+# create object 
+report <- col.name(report(x))
+# call object
+report
+```
+
+# Q3d: Function Building
+  * Round the report to at most 2 digits: leave this as the closing line to the function.
+
+```{r function pt6, echo=TRUE}
+# create function to round
+r.report <- function(x){
+  # rounding by 2
+  round(x,digits = 2)
+}
+```
+
+# Q3e: Function Building
+  * Finally, run the function on your sleep data to show the output.
+
+```{r function pt7, echo=TRUE}
+# call round function
+r.report(report)
+```
+
+# Q4a: FiveThrityEight Data
+  * Install the fivethirtyeight package.
+
+```{r install, echo=TRUE}
+#install.packages("fivethirtyeight")
+```
+
+# Q4b: FiveThrityEight Data
+  * In the listing of Data sets in package 'fivethirtyeight,' assign the 22nd data set to an object 'df.'
+
+```{r assign_22, echo=TRUE}
+f <- data(package = "fivethirtyeight")
+df <- f$results[22,"Item"]
+df
+```
+
+# Q4c: FiveThrityEight Data
+  * Use a more detailed list of the data sets to write out the URL in a comment to the related news story.
+
+```{r url, echo=TRUE}
+library(fivethirtyeight)
+vignette("fivethirtyeight", package = "fivethirtyeight")
+# Commenting in the URL link
+# http://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/
+```
+
+# Q4d: FiveThrityEight Data
+  * Using R command(s), give the dimensions and column names of this data frame.
+
+```{r col_dim, echo=TRUE}
+r.df <- fivethirtyeight::college_recent_grads
+# column names
+names(r.df)
+# get output number of Rows, Number of Columns
+dim(r.df)
+```
+
+# Q5a: Data Summary
+  * Write an R command that gives you the column names of the data frame.  Right after that, write one that counts the number of columns but not rows. Hint: The number should match one of your numbers in Question 1d for dimensions.
+
+```{r colname, echo=TRUE}
+# column names
+names(r.df)
+# number of columns
+ncol(r.df)
+```
+# Q5b: Data Summary
+  * Generate a count of each unique major_category in the data frame. I recommend using libraries to help.  To be clear, this should look like a matrix or data frame containing the major_category and the frequency it occurs in the dataset.  Assign it to major_count.
+
+```{r major_count, echo=TRUE}
+  # Using dplyr to list unique major and get count of each major, placed into variable
+  major_count <- dplyr::count(r.df,r.df$major_category)
+  # renaming columns
+  colnames(major_count) = c("Major","Count")
+  # output variable
+  major_count
+```
+
+# Q5c: Data Summary
+  * To make things easier to read, put par(las=2) before your plot to make the text perpendicular to the axis.  Make a barplot of major_count.  Make sure to label the title with something informative (check the vignette if you need), label the x and y axis, and make it any color other than grey. Assign the major_category labels to their respective bar. Flip the barplot horizontally so that bars extend to the right, not upward. All of these options can be done in a single pass of barplot(). Note: It's okay if it's wider than the preview pane.
+
+```{r boxplot, echo=TRUE}
+  par(las=2)
+  # changing the margins
+  par(mar=c(3,12,3,0))
+  # changing the axis font size
+  par(cex.axis=.7)
+  # building bar plot
+  barplot(major_count$Count,horiz = TRUE,names.arg = major_count$Major ,col="dark green",
+          # main title
+          main = "The Economic Guide to Picking A College Major"
+          ,cex.lab = .5)
+  # changing the margin and creating the ylab title
+  title(ylab = "Major Category", cex.lab = 1,
+      line = 11,col.lab = 20)
+  # changing the margin and creating the xlab title
+    title(xlab = "Major Category", cex.lab = 1,
+      line = 2,col.lab = 20)
+
+```
+
+# Q5d: Data Summary
+  * Write the fivethirtyeight data to a csv file.  Make sure that it does not have row labels.
+```{r call_write_csv, echo=TRUE}
+require(RCurl)
+# grabbing raw data from fivethirtyeight
+Git.raw <- read.csv(text=getURL("https://raw.githubusercontent.com/rudeboybert/fivethirtyeight/master/data-raw/college-majors/recent-grads.csv"), header=T)
+# writing the raw github data to a new csv file called "recentgrad"
+write.csv(Git.raw, file = 'E:\\Documents\\School\\MSDS 6306\\Unit 3\\recentgrad.csv', row.names = FALSE)
+```
+
+# Q6a-d: codebook
+  * Start a new repository on GitHub for your SMU MSDS homework. On your local device, make sure there is a directory for Homework at the minimum; you are welcome to add whatever you would like to this repo in addition to your requirements here.
+  * Create a README.md file which explains the purpose of the repository, the topics included, the sources for the material you post, and contact information in case of questions. Remember, the one in the root directory should be general. You are welcome to make short READMEs for each assignment individually in other folders.
+  * In one (or more) of the nested directories, post your RMarkdown script, HTML file, and data from 'fivethirtyeight.' Make sure that in your README or elsewhere that you credit fivethirtyeight in some way.
+  * In your RMarkdown script, please provide the link to this GitHub so the grader can see it.
+
+```{r codebook, echo=TRUE}
+# Github link: https://github.com/joshyi67/SMU-MSDS-Homework
+```
