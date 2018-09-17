@@ -20,6 +20,8 @@ Shown in order as seen on homework:
 Other sources:
   * https://dplyr.tidyverse.org/
   * https://www.statmethods.net/graphs/bar.html
+  * https://github.com/opetchey/RREEBES/wiki/Reading-data-and-code-from-an-online-github-repository
+  * https://swcarpentry.github.io/r-novice-inflammation/11-supp-read-write-csv/
   
 # Material
   * RMD file
