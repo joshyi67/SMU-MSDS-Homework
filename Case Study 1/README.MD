@@ -8,8 +8,11 @@ Case Study 1 assignment detail:
 
 # Usage
 
-  * Analytical and Educational
-  * Decision Support
+  * JYi_CaseStudy1.Rmd and .md contains the rmarkdown report
+  * Beers.csv dataset
+  * Breweries.csv dataset
+  * custom.css is a custom file for quote blocks. 
+  * JYi_CaseStudy1.html is the html output
 
 # Sources
 
@@ -35,7 +38,6 @@ Other sources:
   * Raw csv file for "Beer" and "Breweries"
   * MD file
   * HTML file
-  * Powerpoint
   * custom.css 
       - File is needed to customize the quote block in the RMD file
 
