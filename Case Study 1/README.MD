@@ -13,6 +13,7 @@ Case Study 1 assignment detail:
   * Breweries.csv dataset
   * custom.css is a custom file for quote blocks. 
   * JYi_CaseStudy1.html is the html output
+  * Powerpoint is for report out purpose
 
 # Sources
 
@@ -38,6 +39,7 @@ Other sources:
   * Raw csv file for "Beer" and "Breweries"
   * MD file
   * HTML file
+  * PowerPoint
   * custom.css 
       - File is needed to customize the quote block in the RMD file
 
