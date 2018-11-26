@@ -214,7 +214,7 @@ Job_MDTest = emp_test %>% filter(JobRole == 'Manufacturing Director')
 pred_MD = class::knn(Job_MDTrain[,c(8,25,27,42)],Job_MDTest[,c(8,25,27,42)],Job_MDTrain$Attrition, k= 3) # KNN classifcation function at k = 3
 Job_MDTest$MD_Pred = factor(pred_MD) # inserting into column at testTX2
 
-pred_HRAttrition = confusionMatrix(table(factor(Job_MDTest$Attrition), Job_MDTest$MD_Pred)) # running confusion Matrix at k = 3
+pred_MDAttrition = confusionMatrix(table(factor(Job_MDTest$Attrition), Job_MDTest$MD_Pred)) # running confusion Matrix at k = 3
 
 # Research Scientist KNN - .6852
 Job_RSTrain = emp_train %>% filter(JobRole == 'Research Scientist')
@@ -234,14 +234,32 @@ Job_LTTest$LT_Pred = factor(pred_LT) # inserting into column at testTX2
 
 pred_LTAttrition = confusionMatrix(table(factor(Job_LTTest$Attrition), Job_LTTest$LT_Pred)) # running confusion Matrix at k = 3
 
-# Laboratory Technician KNN - .6739
-Job_LTTrain = emp_train %>% filter(JobRole == 'Laboratory Technician')
-Job_LTTest = emp_test %>% filter(JobRole == 'Laboratory Technician')
+# Sales Executive KNN - .8088
+Job_SETrain = emp_train %>% filter(JobRole == 'Sales Executive')
+Job_SETest = emp_test %>% filter(JobRole == 'Sales Executive')
 
-pred_LT = class::knn(Job_LTTrain[,c(12,20,26,27,53)],Job_LTTest[,c(12,20,26,27,53)],Job_LTTrain$Attrition, k= 3) # KNN classifcation function at k = 3
-Job_LTTest$LT_Pred = factor(pred_LT) # inserting into column at testTX2
+pred_SE = class::knn(Job_SETrain[,c(12,20,27,30,36)],Job_SETest[,c(12,20,27,30,36)],Job_SETrain$Attrition, k= 3) # KNN classifcation function at k = 3
+Job_SETest$SE_Pred = factor(pred_SE) # inserting into column at testTX2
 
-pred_LTAttrition = confusionMatrix(table(factor(Job_LTTest$Attrition), Job_LTTest$LT_Pred)) # running confusion Matrix at k = 3
+pred_SEAttrition = confusionMatrix(table(factor(Job_SETest$Attrition), Job_SETest$SE_Pred)) # running confusion Matrix at k = 3
+
+# Sales Representative KNN - .3889
+Job_SRTrain = emp_train %>% filter(JobRole == 'Sales Representative')
+Job_SRTest = emp_test %>% filter(JobRole == 'Sales Representative')
+
+pred_SR = class::knn(Job_SRTrain[,c(2,5,42,12,53,15,65,20,21,25,26,30,31,32,34,35)],Job_SRTest[,c(2,5,42,12,53,15,65,20,21,25,26,30,31,32,34,35)],Job_SRTrain$Attrition, k= 3) # KNN classifcation function at k = 3
+Job_SRTest$SR_Pred = factor(pred_SR) # inserting into column at testTX2
+
+pred_SRAttrition = confusionMatrix(table(factor(Job_SRTest$Attrition), Job_SRTest$SR_Pred)) # running confusion Matrix at k = 3
+
+# Healthcare Representative KNN - .3889
+Job_HealthTrain = emp_train %>% filter(JobRole == 'Healthcare Representative')
+Job_HealthTest = emp_test %>% filter(JobRole == 'Healthcare Representative')
+
+pred_Health = class::knn(Job_HealthTrain[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTest[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTrain$Attrition, k= 3) # KNN classifcation function at k = 3
+Job_HealthTest$Health_Pred = factor(pred_Health) # inserting into column at testTX2
+
+pred_HealthAttrition = confusionMatrix(table(factor(Job_HealthTest$Attrition), Job_HealthTest$Health_Pred)) # running confusion Matrix at k = 3
 
 ```
 
