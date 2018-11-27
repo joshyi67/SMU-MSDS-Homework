@@ -125,6 +125,7 @@ ggsave("ggkeySignPairs.png",plot = last_plot(), type = png())
 
 ```
 
+##### BLah Signficants between models
 
 ```{r BaseGLM}
 #You should identify (at least) the top three factors that contribute to turnover. There may or may not be a need to create derived attributes/variables.
@@ -142,6 +143,12 @@ glm_modelAll <- glm(emp_result$Attrition~.,emp_result[,c(cols.CatGLM)], family =
 summary(glm_modelAll)
 
 #Need to Consolidate into one Plot *******TO DO******
+# Josh to Do
+
+```
+
+```{r DetailGLM}
+#Add Detail GLM
 
 ```
 
@@ -166,7 +173,11 @@ knnPrediction
 
 ```
 
+```{r KNNDetail}
+#Add Ddetailed KNN
 
+
+```
 ### *KWeighted*
 >##### R-code Explanation:
   - 
@@ -416,7 +427,7 @@ Job_HealthTrain = emp_train %>% filter(JobRole == 'Healthcare Representative')
 Job_HealthTest = emp_test %>% filter(JobRole == 'Healthcare Representative')
 
 pred_Health = class::knn(Job_HealthTrain[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTest[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTrain$Attrition, k= 3) # KNN classifcation function at k = 3
-Job_HealthTest$Health_Pred = factor(pred_Health) # inserting into column at testTX2
+Job_HealthTest$Health_Pred = (pred_Health) # inserting into column at testTX2
 
 #Error - Need to Fix
 pred_HealthAttrition = confusionMatrix(table(factor(Job_HealthTest$Attrition, Job_HealthTest$Health_Pred)) # running confusion Matrix at k = 3
