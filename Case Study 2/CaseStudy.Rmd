@@ -28,10 +28,18 @@ library(FNN)
 library(stringr)
 ```
 
-## R Markdown
+# **Introduction**
 
 
-```{r cars}
+
+>##### R-code Explanation:
+ - 
+
+>##### Analysis Explanation:
+
+
+
+```{r GLM_Model}
 employee <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
 employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 
@@ -120,50 +128,52 @@ glm_modelAll <- glm(emp_result$Attrition~.,emp_result[,c(cols.CatGLM)], family =
 summary(glm_modelAll)
 
 summary(result$JobRole)
-
-#Search Code
-#head(emp_train[,c(cols.CatAll)])
-#emp_train[,c(cols.CatAll)]
-#sum(emp_train$BusinessTravel_Travel_Frequently)
-#emp_train[which(emp_train$Attrition == "Yes" & emp_train$BusinessTravel_Travel_Frequently == "1"),]
-
           
 #The business is also interested in learning about any job role specific trends that may exist in the data set (e.g., "Data Scientists have the highest job satisfaction"). 
 # HR
 glm_model_JobRoleHR <- glm(emp_result$`JobRole_Human Resources`~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleHR)
+JobRoleHR = data.frame(coef(summary(glm_model_JobRoleHR))[,4])
+names(JobRoleHR) = "Human Resources"
 
 # Manufactoring Director
 glm_model_JobRoleManufactoring <- glm(emp_result$`JobRole_Manufacturing Director`~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleManufactoring)
+JobRoleManufactoring = data.frame(coef(summary(glm_model_JobRoleManufactoring))[,4])
+names(JobRoleManufactoring) = "Manufacturing Director"
 
 # Research Scientist
 glm_model_JobRoleResearch <- glm(emp_result$`JobRole_Research Scientist`~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleResearch)
+JobRoleResearch = data.frame(coef(summary(glm_model_JobRoleResearch))[,4])
+names(JobRoleResearch) = "Research Scientist"
 
 # Lab Tech
 glm_model_JobRoleLab <- glm(emp_result$`JobRole_Laboratory Technician`~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleLab)
+JobRoleLab = data.frame(coef(summary(glm_model_JobRoleLab))[,4])
+names(JobRoleLab) = "Laboratory Technician"
 
 # Research Director
 glm_model_JobRoleResearchDirector <- glm(emp_result$`JobRole_Research Director`~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleResearchDirector)
+JobRoleRD = data.frame(coef(summary(glm_model_JobRoleResearchDirector))[,4])
+names(JobRoleRD) = "Research Director"
 
 # Sales Exec
 glm_model_JobRoleSalesExec <- glm(emp_result$`JobRole_Sales Executive`~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleSalesExec)
+JobRoleSE = data.frame(coef(summary(glm_model_JobRoleSalesExec))[,4])
+names(JobRoleSE) = "Sales Executive"
 
 # Sales Person
 glm_model_JobRoleSalesPerson <- glm(emp_result$`JobRole_Sales Representative`~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleSalesPerson)
+JobRoleSP = data.frame(coef(summary(glm_model_JobRoleSalesPerson))[,4])
+names(JobRoleSP) = "Sales Representative"
 
 # Manager
 glm_model_JobRoleManager <- glm(emp_result$JobRole_Manager~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleManager)
+JobRoleManager = data.frame(coef(summary(glm_model_JobRoleManager))[,4])
+names(JobRoleManager) = "Manager"
 
 # HealthCare
 glm_model_JobRoleHealth <- glm(emp_result$`JobRole_Healthcare Representative`~.,emp_result[,c(col.NoJobRole)], family = binomial)
-summary(glm_model_JobRoleHealth)
+JobRoleHealthR = data.frame(coef(summary(glm_model_JobRoleHealth))[,4])
+names(JobRoleHealthR) = "Healthcare Representative"
 
 # Atrition by Job Role
 glm_model_HighestAttrition  <- glm(emp_train$Attrition~.,emp_train[,c(cols.JobRoles)], family = binomial)
@@ -178,17 +188,17 @@ dtGender$Type <- as.character("Gender")
 # Marital Status by Role
 glm_model_Marital  <- glm(emp_train$MaritalStatus~.,emp_train[,c(cols.JobRoles)], family = binomial)
 summary(glm_model_Marital)
-#dtMarital <- data.frame(cbind(t(glm_model_Marital$coefficients)))
-#dtMarital$Type <- as.character("Marital")
 
 # Consolidated
-#SummaryPred <-rbind(dtGender, dtMarital)
-#SummaryPred <- SummaryPred[order(-SummaryPred$Accuracy),]
-#SummaryPred <- SummaryPred[,c(19,1:18)]
-#SummaryPred
+Table.glm <-cbind(JobRoleHR, JobRoleManufactoring,JobRoleResearch,JobRoleLab,JobRoleRD,JobRoleSE,JobRoleManager,JobRoleHealthR)
+Table.glm
 
 ```
-## KNN
+### *KNN*
+>##### R-code Explanation:
+  - 
+  
+>##### Analysis Explanation:
 
 
 ```{r KNN}
@@ -211,9 +221,8 @@ pred_HRAttrition = confusionMatrix(table(factor(Job_HRTest$Attrition), Job_HRTes
 Job_MDTrain = emp_train %>% filter(JobRole == 'Manufacturing Director')
 Job_MDTest = emp_test %>% filter(JobRole == 'Manufacturing Director')
 
-pred_MD = class::knn(Job_MDTrain[,c(8,25,27,42)],Job_MDTest[,c(8,25,27,42)],Job_MDTrain$Attrition, k= 3) # KNN classifcation function at k = 3
-Job_MDTest$MD_Pred = factor(pred_MD) # inserting into column at testTX2
-
+pred_MD = class::knn(Job_MDTrain[,c(8,22,25,27,42)],Job_MDTest[,c(8,22,25,27,42)],Job_MDTrain$Attrition, k= 3) # KNN classifcation function at k = 3
+Job_MDTest$MD_Pred =pred_MD # inserting into column at testTX2
 pred_MDAttrition = confusionMatrix(table(factor(Job_MDTest$Attrition), Job_MDTest$MD_Pred)) # running confusion Matrix at k = 3
 
 # Research Scientist KNN - .6852
@@ -263,7 +272,11 @@ pred_HealthAttrition = confusionMatrix(table(factor(Job_HealthTest$Attrition), J
 
 ```
 
-## KNNWeighted
+### *KNNWeighted*
+>##### R-code Explanation:
+  - 
+  
+>##### Analysis Explanation:
 
 ```{r KNNWeighted}
 # K Weighted
@@ -279,7 +292,11 @@ plot(kknn.train)
 
 ```
 
-## Logistic_Regression
+### *Logistic_Regression*
+>##### R-code Explanation:
+  - 
+  
+>##### Analysis Explanation:
 
 ```{r Logistic_Regression}
 #predict probabilities on testset
