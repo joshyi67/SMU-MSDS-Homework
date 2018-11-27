@@ -1,6 +1,6 @@
 ---
 title: "Doing Data Science Case Study 2"
-author: "Joshua Yi and Grant Bourzikas"
+author: "Grant Bourzikas"
 date: "November 24, 2018"
 output: html_document
 ---
@@ -27,6 +27,7 @@ library(class)
 library(FNN)
 library(stringr)
 library(reshape)
+library(kknn)
 ```
 
 # **Introduction**
@@ -38,22 +39,27 @@ library(reshape)
 
 >##### Analysis Explanation:
 
+getwd()
 
+```{r ReadDataIn}
+# Josh Path
+#employee <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+#employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 
-```{r GLM_Model}
-employee <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
-employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
-
-#employee <- read.csv("data/CaseStudy2-data.csv", na.strings = "NULL")
-#employeeValidation <- read.csv("data//CaseStudy2Validation.csv", na.strings = "NULL")
+#Grant Path
+employee <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+employeeValidation <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 result <-rbind(employee,employeeValidation)
+```
 
+```{r CreateDummy}
 #Create Dummy Variables
 emp_train <- fastDummies::dummy_cols(employee)
 emp_test <- fastDummies::dummy_cols(employeeValidation)
 emp_result <- rbind(emp_test, emp_test)
+```
 
-```{r DefineVariables}
+```{r CreateVariables}
 # Define Data Colums to Make it Easier
 cols.Base <- c(2:36)
 cols.CatAttr <- c(38:39)
@@ -71,12 +77,12 @@ cols.NumericAll <- c(1,2,5,7,8,10,11,12,14,15,16,18,20,21,22,25,26,27,28,29,30,3
 cols.Attrition <- 3
 cols.KeyFieldsBaseModel <- c(40:42,7,12,63:65,22,67:68,27,30,31:36)
 ```
+
 ```{r EDA}
 # Basic EDA
 # Run Pars - Identify Key Variables then Run
 #ggpairs_BaseData <-  ggpairs(emp_result[,c(cols.Base)], diag=list(continuous="densityDiag", discrete="barDiag"), axisLabels="show")
 #ggpairs_BaseData1 <-  ggpairs(emp_result[,c(cols.KeyFieldsBaseModel)], diag=list(continuous="densityDiag", discrete="barDiag"), axisLabels="show")
-
 
 #EDA - Exploratory Not for Report
 pairs(emp_result[,c(2:5)], col=emp_train$Attrition)
@@ -92,13 +98,15 @@ pairs(emp_result[,c(46:50)], col=emp_train$Attrition)
 pairs(emp_result[,c(51:55)], col=emp_train$Attrition)
 pairs(emp_result[,c(56:60)], col=emp_train$Attrition)
 pairs(emp_result[,c(61:68)], col=emp_train$Attrition)
+```
 
+```{r HeatMap}
 # Heat Map for All Fields
 employeeHeatMap <- round(cor(emp_result[,c(cols.NumericAll)]),2)
 melted_employeeHeatMap <- melt(employeeHeatMap)
 ggplot(data = melted_employeeHeatMap, aes(x=X1, y=X2, fill=value)) + 
     geom_tile()
-ggsave("employeeHeatMap.png",plot = ggkeySignPairs, type = png())
+ggsave("images/employeeHeatMap.png",plot = last_plot(), type = png())
 
 
 # Heat Map for Key Sign Fields
@@ -106,8 +114,7 @@ employeeHeatMapSig <- round(cor(emp_result[,c(cols.KeyFieldsBaseModel)]),2)
 melted_employeeHeatMapSig <- melt(employeeHeatMapSig)
 ggplot(data = melted_employeeHeatMapSig, aes(x=X1, y=X2, fill=value)) + 
   geom_tile()
-ggsave("employeeHeatMapSig.png",plot = employeeHeatMapSig, type = png())
-
+ggsave("images/employeeHeatMapSig.png",plot = last_plot(), type = png())
 
 # EDA For Key Sign Fields on Attrition for Overall Model
 ggkeySignPairs <- ggpairs(
@@ -115,22 +122,30 @@ ggkeySignPairs <- ggpairs(
  emp_result[,c(cols.KeyFieldsBaseModel)], 
   diag=list(continuous="densityDiag", discrete="barDiag"), 
   axisLabels="show") + theme_minimal()
-ggsave("ggkeySignPairs.png",plot = ggkeySignPairs, type = png())
+ggsave("ggkeySignPairs.png",plot = last_plot(), type = png())
+
+
+
 ```
 
 
-```{r GLM_Model}
+```{r BaseGLM}
 #You should identify (at least) the top three factors that contribute to turnover. There may or may not be a need to create derived attributes/variables.
 
 #TrainDataSet
 glm_modeltrain <- glm(emp_train$Attrition~.,emp_train[,c(cols.CatGLM)], family = binomial)
 summary(glm_modeltrain)
+
 #TestDataSet
 glm_modeltest <- glm(emp_test$Attrition~.,emp_test[,c(cols.CatGLM)], family = binomial)
 summary(glm_modeltest)
+
 #AllData
 glm_modelAll <- glm(emp_result$Attrition~.,emp_result[,c(cols.CatGLM)], family = binomial)
 summary(glm_modelAll)
+
+#Need to Consolidate into one Plot *******TO DO******
+
 ```
 
 
@@ -406,6 +421,7 @@ Job_HealthTest = emp_test %>% filter(JobRole == 'Healthcare Representative')
 pred_Health = class::knn(Job_HealthTrain[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTest[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTrain$Attrition, k= 3) # KNN classifcation function at k = 3
 Job_HealthTest$Health_Pred = factor(pred_Health) # inserting into column at testTX2
 
-pred_HealthAttrition = confusionMatrix(table(factor(Job_HealthTest$Attrition), Job_HealthTest$Health_Pred) # running confusion Matrix at k = 3
+#Error - Need to Fix
+#pred_HealthAttrition = confusionMatrix(table(factor(Job_HealthTest$Attrition), Job_HealthTest$Health_Pred) # running confusion Matrix at k = 3
 
 ```
