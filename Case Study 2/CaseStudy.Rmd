@@ -1,6 +1,6 @@
 ---
 title: "Doing Data Science Case Study 2"
-author: "Grant Bourzikas"
+author: "Joshua Yi & Grant Bourzikas"
 date: "November 24, 2018"
 output: html_document
 ---
@@ -32,14 +32,8 @@ library(kknn)
 
 # **Introduction**
 
+### Yi & Bourzikas specializes in talent management solutions for Fortune 1000 companies focus on building and developing strategies for retaining employees. We specialize in include workforce planning, employee training programs, identifying high-potential employees and reducing/preventing voluntary employee turnover (attrition). As part of this engagement, our data science team will predict for your organization. 
 
-
->##### R-code Explanation:
- - 
-
->##### Analysis Explanation:
-
-getwd()
 
 ```{r ReadDataIn}
 # Josh Path
@@ -78,11 +72,11 @@ cols.Attrition <- 3
 cols.KeyFieldsBaseModel <- c(40:42,7,12,63:65,22,67:68,27,30,31:36)
 ```
 
+
+##### We received the data files from your employee database and have outlined some key hightlights.  The following charts are part of our exploratory data and will give your organization an idea of how different features in the dataset apply.  The pair plots show all the variables based on whether your employees have left the organiation.  
+
 ```{r EDA}
 # Basic EDA
-# Run Pars - Identify Key Variables then Run
-#ggpairs_BaseData <-  ggpairs(emp_result[,c(cols.Base)], diag=list(continuous="densityDiag", discrete="barDiag"), axisLabels="show")
-#ggpairs_BaseData1 <-  ggpairs(emp_result[,c(cols.KeyFieldsBaseModel)], diag=list(continuous="densityDiag", discrete="barDiag"), axisLabels="show")
 
 #EDA - Exploratory Not for Report
 pairs(emp_result[,c(2:5)], col=emp_train$Attrition)
@@ -93,12 +87,15 @@ pairs(emp_result[,c(21:25)], col=emp_train$Attrition)
 pairs(emp_result[,c(26:30)], col=emp_train$Attrition)
 pairs(emp_result[,c(31:35)], col=emp_train$Attrition)
 pairs(emp_result[,c(36:40)], col=emp_train$Attrition)
-pairs(emp_result[,c(41:45)], col=emp_train$Attrition)
-pairs(emp_result[,c(46:50)], col=emp_train$Attrition)
-pairs(emp_result[,c(51:55)], col=emp_train$Attrition)
-pairs(emp_result[,c(56:60)], col=emp_train$Attrition)
-pairs(emp_result[,c(61:68)], col=emp_train$Attrition)
+#No Data in Paris
+#pairs(emp_result[,c(41:45)], col=emp_train$Attrition)
+#pairs(emp_result[,c(46:50)], col=emp_train$Attrition)
+#pairs(emp_result[,c(51:55)], col=emp_train$Attrition)
+##pairs(emp_result[,c(56:60)], col=emp_train$Attrition)
+#pairs(emp_result[,c(61:68)], col=emp_train$Attrition)
 ```
+
+#####  Because of the data that we were able to analyze as part of the Par Plots above, we then developed 2 Heat Maps and Correlations and Distribtuion Matrix to take a deeper dive in the dataset. 
 
 ```{r HeatMap}
 # Heat Map for All Fields
@@ -422,6 +419,6 @@ pred_Health = class::knn(Job_HealthTrain[,c(2,52,14,63,64,27,30,34,35,36)],Job_H
 Job_HealthTest$Health_Pred = factor(pred_Health) # inserting into column at testTX2
 
 #Error - Need to Fix
-#pred_HealthAttrition = confusionMatrix(table(factor(Job_HealthTest$Attrition), Job_HealthTest$Health_Pred) # running confusion Matrix at k = 3
+pred_HealthAttrition = confusionMatrix(table(factor(Job_HealthTest$Attrition, Job_HealthTest$Health_Pred)) # running confusion Matrix at k = 3
 
 ```
