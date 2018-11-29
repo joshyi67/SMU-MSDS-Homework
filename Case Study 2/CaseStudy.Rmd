@@ -39,11 +39,11 @@ library(formattable)
 
 ```{r ReadDataIn}
 # Josh Path
-employee <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
-employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
+#employee <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+#employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 #Grant Path
-#employee <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
-#employeeValidation <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
+employee <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+employeeValidation <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 result <-rbind(employee,employeeValidation)
 ```
 
@@ -223,7 +223,7 @@ knn.train = train(Attrition~., data=emp_train[,c(cols.CatKNN)], method="knn")
 knn.train
 #Set K=18 sq of 1480
 knn.test = knn(emp_train[,c(cols.CatKNN)][,-3], emp_test[,c(cols.CatKNN)][,-3], emp_train[,c(cols.CatKNN)][,3], k=18)
-knnPrediction <-confusionMatrix(table(knn.test, emp_test$Attrition))
+knnPrediction <-?confusionMatrix(table(knn.test, emp_test$Attrition))
 knnPrediction
 ```
 
