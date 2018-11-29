@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r loadlib, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE,warning=FALSE)
 library(kableExtra)
 library(ggplot2)
 library(fpp2) 
@@ -28,6 +28,9 @@ library(FNN)
 library(stringr)
 library(reshape)
 library(kknn)
+library(dplyr)
+library(kableExtra)
+library(formattable)
 ```
 
 # **Introduction**
@@ -36,11 +39,11 @@ library(kknn)
 
 ```{r ReadDataIn}
 # Josh Path
-#employee <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
-#employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
+employee <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 #Grant Path
-employee <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
-employeeValidation <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
+#employee <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+#employeeValidation <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 result <-rbind(employee,employeeValidation)
 ```
 
@@ -69,7 +72,7 @@ cols.Attrition <- 3
 cols.KeyFieldsBaseModel <- c(40:42,7,12,63:65,22,67:68,27,30,31:36)
 ```
 
-##### We received the data files from your employee database and have outlined some key hightlights.  The following charts are part of our exploratory data and will give your organization an idea of how different features in the dataset apply.  The pair plots show all the variables based on whether your employees have left the organiation.  
+#### *We received the data files from your employee database and have outlined some key hightlights.  The following charts are part of our exploratory data and will give your organization an idea of how different features in the dataset apply.  The pair plots show all the variables based on whether your employees have left the organiation.*  
 
 ```{r EDA}
 # Basic EDA
@@ -90,7 +93,7 @@ pairs(emp_result[,c(36:40)], col=emp_train$Attrition)
 #pairs(emp_result[,c(61:68)], col=emp_train$Attrition)
 ```
 
-#####  Because of the data that we were able to analyze as part of the Par Plots above, we then developed 2 Heat Maps and Correlations and Distribtuion Matrix to take a deeper dive in the dataset. 
+####  *Because of the data that we were able to analyze as part of the Par Plots above, we then developed 2 Heat Maps and Correlations and Distribtuion Matrix to take a deeper dive in the dataset.* 
 
 ```{r HeatMap}
 # Heat Map for All Fields
@@ -98,13 +101,14 @@ employeeHeatMap <- round(cor(emp_result[,c(cols.NumericAll)]),2)
 melted_employeeHeatMap <- melt(employeeHeatMap)
 
 ggplot(data = melted_employeeHeatMap, aes(x=X1, y=X2, fill=value)) + 
-theme(axis.text.x  = element_text(size = 7, angle = 90),axis.text.y  = element_text(size = 7))+geom_tile()
+theme(axis.text.x  = element_blank(),axis.ticks.x=element_blank(),axis.title.x=element_blank(),axis.text.y  = element_text(size = 7))+geom_tile()
 #ggsave("images/employeeHeatMap.png",plot = last_plot(), type = png())
 
 # Heat Map for Key Sign Fields
 employeeHeatMapSig <- round(cor(emp_result[,c(cols.KeyFieldsBaseModel)]),2)
 melted_employeeHeatMapSig <- melt(employeeHeatMapSig)
 ggplot(data = melted_employeeHeatMapSig, aes(x=X1, y=X2, fill=value)) + 
+  theme(axis.text.x  = element_blank(),axis.ticks.x=element_blank(),axis.title.x=element_blank(),axis.text.y  = element_text(size = 7))+
   geom_tile()
 #ggsave("images/employeeHeatMapSig.png",plot = last_plot(), type = png())
 # EDA For Key Sign Fields on Attrition for Overall Model
@@ -116,30 +120,29 @@ ggkeySignPairs <- ggpairs(
 #ggsave("ggkeySignPairs.png",plot = last_plot(), type = png())
 ```
 
-##### Showing the significance p-values for each variable. Each column represents different data sets: Training, Test and combined.
+#### *Showing the significance p-values for each variable. Each column represents different data sets: Training, Test and combined. This is important to know, so we know which variables are can be used in the models that we build.*
 
 ```{r BaseGLM}
 #TrainDataSet
-glm_modeltrain <- glm(emp_train$Attrition~.,emp_train[,c(cols.CatGLM)], family = binomial)
-model_Train = data.frame(coef(summary(glm_modeltrain))[,4])
-names(model_Train) = "GLM Training Set"
+glm_modeltrain <- glm(emp_train$Attrition~.,emp_train[,c(cols.CatGLM)], family = binomial) # glm train
+model_Train = data.frame(coef(summary(glm_modeltrain))[,4]) # pvalue from glm train
+names(model_Train) = "GLM Training Set" # title 
 #TestDataSet
-glm_modeltest <- glm(emp_test$Attrition~.,emp_test[,c(cols.CatGLM)], family = binomial)
-model_Test = data.frame(coef(summary(glm_modeltest))[,4])
-names(model_Test) = "GLM Test Set"
+glm_modeltest <- glm(emp_test$Attrition~.,emp_test[,c(cols.CatGLM)], family = binomial) # glm test
+model_Test = data.frame(coef(summary(glm_modeltest))[,4]) # pvalue from glm test
+names(model_Test) = "GLM Test Set" # title
 #AllData
-glm_modelAll <- glm(emp_result$Attrition~.,emp_result[,c(cols.CatGLM)], family = binomial)
-model_All = data.frame(coef(summary(glm_modelAll))[,4])
-names(model_All) = "GLM All Set"
+glm_modelAll <- glm(emp_result$Attrition~.,emp_result[,c(cols.CatGLM)], family = binomial) # glm for all combined test and train data set
+model_All = data.frame(coef(summary(glm_modelAll))[,4]) # pvalue fro combined data set
+names(model_All) = "GLM All Set" # title
 # Table consolidated
-GLM_dataset <-cbind(model_Train, model_Test,model_All)
+GLM_dataset <-cbind(model_Train, model_Test,model_All) # consolidated train, test and all data set
 # Creating kable table for GLM dataset
 GLM_dataset  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "600px", height = "450px")
+
 ```
 
-* ### *Detailed Models Based on Job Description*
-
-#The business is also interested in learning about any job role specific trends that may exist in the data set (e.g., "Data Scientists have the highest job satisfaction"). Also created a kable table to show significance for Gender and Martial status by job.
+#### *The business is also interested in learning about any job role specific trends that may exist in the data set (e.g., "Data Scientists have the highest job satisfaction"). This tells us which variables are significant by job, meaning we can tell what affects the attrition rate by job. For instance, commute time, if they are single, salary and etc. can all be factors of attrition by job.*
 
 ```{r DetailGLM}
 # Glm for Job role - Human Resources
@@ -210,7 +213,7 @@ Marital_Model  %>%  kable() %>% kable_styling(bootstrap_options = "striped", ful
 ```
 
 
-### *KNN Full Model*
+#### *Running the full KNN model using the training and test data set. The full KNN model came out to have a high accuracy rate of 84%, from there we decided to run the KNN model by job role. The glm showed us that each job has different variables of significance, so the KNN by job reflects different variables that pertains to that specific role.* 
 
 ```{r KNN}
 # KNN
@@ -276,7 +279,7 @@ pred_HealthAttrition = confusionMatrix(table(Job_HealthTest$Attrition, Job_Healt
 
 
 ```
-### *KWeighted*
+#### *KWeighted*
 >##### R-code Explanation:
   - 
   
@@ -296,7 +299,7 @@ par(mar=c(5,5,5,5))
 plot(kknn.train)
 ```
 
-### *Logistic_Regression*
+#### *Logistic_Regression*
 >##### R-code Explanation:
   - 
   
