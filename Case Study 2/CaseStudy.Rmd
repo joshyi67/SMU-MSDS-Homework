@@ -35,7 +35,7 @@ library(formattable)
 
 # **Introduction**
 
-### Yi & Bourzikas specializes in talent management solutions for Fortune 1000 companies focus on building and developing strategies for retaining employees. We specialize in include workforce planning, employee training programs, identifying high-potential employees and reducing/preventing voluntary employee turnover (attrition). As part of this engagement, our data science team will predict for your organization. 
+#### Yi & Bourzikas specializes in talent management solutions for Fortune 1000 companies focus on building and developing strategies for retaining employees. We specialize in include workforce planning, employee training programs, identifying high-potential employees and reducing/preventing voluntary employee turnover (attrition). As part of this engagement, our data science team will predict for your organization. 
 
 ```{r ReadDataIn}
 # Josh Path
@@ -213,7 +213,7 @@ Marital_Model  %>%  kable() %>% kable_styling(bootstrap_options = "striped", ful
 ```
 
 
-#### *Running the full KNN model using the training and test data set. The full KNN model came out to have a high accuracy rate of 84%, from there we decided to run the KNN model by job role. The glm showed us that each job has different variables of significance, so the KNN by job reflects different variables that pertains to that specific role.* 
+#### *Running the full KNN model using the training and test data set. The full KNN model came out to have a high accuracy rate of 84%, from there we decided to run the KNN model by job role. The glm showed us that each job has different variables of significance, so the KNN by job reflects different variables that pertains to that specific role.
 
 ```{r KNN}
 # KNN
@@ -223,9 +223,10 @@ knn.train = train(Attrition~., data=emp_train[,c(cols.CatKNN)], method="knn")
 knn.train
 #Set K=18 sq of 1480
 knn.test = knn(emp_train[,c(cols.CatKNN)][,-3], emp_test[,c(cols.CatKNN)][,-3], emp_train[,c(cols.CatKNN)][,3], k=18)
-knnPrediction <-?confusionMatrix(table(knn.test, emp_test$Attrition))
+knnPrediction <-confusionMatrix(table(knn.test, emp_test$Attrition))
 knnPrediction
 ```
+
 
 ```{r KNN_JobRole}
 # HR KNN
@@ -233,77 +234,78 @@ Job_HRTrain = emp_train %>% filter(JobRole == 'Human Resources')# Train set by j
 Job_HRTest = emp_test %>% filter(JobRole == 'Human Resources')# Test set by job
 pred_HR = class::knn(Job_HRTrain[,c(8,25,27,42)],Job_HRTest[,c(8,25,27,42)],Job_HRTrain$Attrition, k= 4) # using knn
 Job_HRTest$HR_Pred = factor(pred_HR) # creating a new column for knn prediction
-pred_HRAttrition = confusionMatrix(table(factor(Job_HRTest$Attrition), Job_HRTest$HR_Pred)) # running confusion Matrix
+pred_HRAttrition = confusionMatrix(table(factor(Job_HRTest$HR_Pred), Job_HRTest$Attrition))
 
 # Manufacturing Director KNN
 Job_MDTrain = emp_train %>% filter(JobRole == 'Manufacturing Director')# Train set by job
 Job_MDTest = emp_test %>% filter(JobRole == 'Manufacturing Director')# Test set by job
 pred_MD = class::knn(Job_MDTrain[,c(8,22,25,27,42)],Job_MDTest[,c(8,22,25,27,42)],Job_MDTrain$Attrition, k= 3) # KNN classifcation function at k = 3
-Job_MDTest$MD_Pred =pred_MD # creating a new column for knn prediction
-pred_MDAttrition = confusionMatrix(table(factor(Job_MDTest$Attrition), Job_MDTest$MD_Pred)) # running confusion Matrix
+Job_MDTest$MD_Pred = pred_MD # creating a new column for knn prediction
+pred_HRAttrition = confusionMatrix(table(Job_MDTest$MD_Pred, Job_MDTest$Attrition))
+
 
 # Research Scientist KNN
 Job_RSTrain = emp_train %>% filter(JobRole == 'Research Scientist') # Train set by job
 Job_RSTest = emp_test %>% filter(JobRole == 'Research Scientist') # Test set by job
 pred_RS = class::knn(Job_RSTrain[,c(8,12,14,20,21,33,34,40)],Job_RSTest[,c(8,12,14,20,21,33,34,40)],Job_RSTrain$Attrition, k = 3) # using knn
 Job_RSTest$RS_Pred = factor(pred_RS) # creating a new column for knn prediction
-pred_RSAttrition = confusionMatrix(table(factor(Job_RSTest$Attrition), Job_RSTest$RS_Pred)) # running confusion Matrix
+pred_RSAttrition = confusionMatrix(table(factor(Job_RSTest$RS_Pred),Job_RSTest$Attrition)) # running confusion Matrix
 
 # Laboratory Technician KNN
 Job_LTTrain = emp_train %>% filter(JobRole == 'Laboratory Technician')# Train set by job
 Job_LTTest = emp_test %>% filter(JobRole == 'Laboratory Technician')# Test set by job
 pred_LT = class::knn(Job_LTTrain[,c(12,20,26,27,53)],Job_LTTest[,c(12,20,26,27,53)],Job_LTTrain$Attrition, k= 3) # using knn
 Job_LTTest$LT_Pred = factor(pred_LT)  # creating a new column for knn prediction
-pred_LTAttrition = confusionMatrix(table(factor(Job_LTTest$Attrition), Job_LTTest$LT_Pred)) # running confusion Matrix
+pred_LTAttrition = confusionMatrix(table(factor(Job_LTTest$LT_Pred),Job_LTTest$Attrition)) # running confusion Matrix
 
 # Sales Executive KNN - .8088
 Job_SETrain = emp_train %>% filter(JobRole == 'Sales Executive')
 Job_SETest = emp_test %>% filter(JobRole == 'Sales Executive')
 pred_SE = class::knn(Job_SETrain[,c(12,20,27,30,36)],Job_SETest[,c(12,20,27,30,36)],Job_SETrain$Attrition, k= 3) # KNN classifcation function at k = 3
 Job_SETest$SE_Pred = factor(pred_SE) # inserting into column at testTX2
-pred_SEAttrition = confusionMatrix(table(factor(Job_SETest$Attrition), Job_SETest$SE_Pred)) # running confusion Matrix at k = 3
+pred_SEAttrition = confusionMatrix(table(factor(Job_SETest$SE_Pred), Job_SETest$Attrition)) # running confusion Matrix at k = 3
 
 # Sales Representative KNN - .3889
 Job_SRTrain = emp_train %>% filter(JobRole == 'Sales Representative')
 Job_SRTest = emp_test %>% filter(JobRole == 'Sales Representative')
 pred_SR = class::knn(Job_SRTrain[,c(2,5,42,12,53,15,65,20,21,25,26,30,31,32,34,35)],Job_SRTest[,c(2,5,42,12,53,15,65,20,21,25,26,30,31,32,34,35)],Job_SRTrain$Attrition, k= 3) # KNN classifcation function at k = 3
 Job_SRTest$SR_Pred = factor(pred_SR) # inserting into column at testTX2
-pred_SRAttrition = confusionMatrix(table(factor(Job_SRTest$Attrition), Job_SRTest$SR_Pred)) # running confusion Matrix at k = 3
+pred_SRAttrition = confusionMatrix(table(factor(Job_SRTest$SR_Pred), Job_SRTest$Attrition)) # running confusion Matrix at k = 3
 
 # Healthcare Representative KNN - .3889
 Job_HealthTrain = emp_train %>% filter(JobRole == 'Healthcare Representative')
 Job_HealthTest = emp_test %>% filter(JobRole == 'Healthcare Representative')
 pred_Health = class::knn(Job_HealthTrain[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTest[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTrain$Attrition, k= 3) # KNN classifcation function at k = 3
 Job_HealthTest$Health_Pred = factor(pred_Health) # inserting into column at testTX2
-pred_HealthAttrition = confusionMatrix(table(Job_HealthTest$Attrition, Job_HealthTest$Health_Pred)) # running confusion Matrix at k = 3
+pred_HealthAttrition = confusionMatrix(table(Job_HealthTest$Health_Pred, Job_HealthTest$Attrition)) # running confusion Matrix at k = 3
 
 
 ```
 #### *KWeighted*
->##### R-code Explanation:
-  - 
-  
->##### Analysis Explanation:
 
+##### Analysis Explanation:
+#### *Running the Weighted KNN model using the training and test data set. The Weighted KNN model came out to have a higher accuracy rate of 84.4 than the KNN which was 84%.  Additinoao, the plot below shows the optinal K which is 30.
 
 ```{r KWeighted}
 # K Weighted
 set.seed(123)
+
+#performs leave-one-out crossvalidation 
 kknn.train = train.kknn(Attrition~., data=emp_train[,c(cols.CatKNN)], kmax=30, distance = 2)
+#Predict Attribution
 prediction <- predict(kknn.train, emp_test[,c(cols.CatKNN)][,-3])
+#Show Confusion Matrix
 kWeightedPrediction <- confusionMatrix(table(emp_test[,c(cols.CatKNN)][,3],prediction))
-knnPrediction <-confusionMatrix(table(knn.test, emp_test$Attrition))
 kWeightedPrediction
+# Plot Prediction for number of K
 graphics.off() 
 par(mar=c(5,5,5,5))
 plot(kknn.train)
 ```
 
 #### *Logistic_Regression*
->##### R-code Explanation:
-  - 
-  
->##### Analysis Explanation:
+The following model is logistic regression the test and training set for all the fields.  For logistic regression to work, the data was formatted to numeric data and setup with a prediction interval in which we converted a probability. In this model, we predicted at an 87% rate.
+##### Analysis Explanation:
 
 ```{r Logistic_Regression}
 # Logistic Regression (No Lasso)
@@ -322,10 +324,10 @@ LogRegOnly
 ```
 
 ### *Logistic_Regression Using Lasso*
->##### R-code Explanation:
-  - 
-  
->##### Analysis Explanation:
+
+##### Analysis Explanation:
+Adding to the the Logistric Regression model above, Logistic_Regression Using Lasso was use for automated feature selection. As part of this model, we disovered that only 6 variables predict at 86% vs general logistic regression of 87% that utilizes all fields in the dataset.  Becaue the Logistic_Regression Using Lasso is more efficiency, our recmmendatino is to run the logistic regrssion model using LASSO because it is more efficent and only 1% less prediction.
+
 
 ```{r Logistic_Regression_Lasso}
 #Begin Logistic Regression with Lasso
@@ -345,7 +347,7 @@ lambda_min <- cv.out$lambda.min
 lambda_1se <- cv.out$lambda.1se
 #regression coefficients
 glm.lasso.coef <- coef(cv.out,s=lambda_1se)
-#view(data.frame(name = glm.lasso.coef@Dimnames[[1]][glm.lasso.coef@i + 1], coefficient = glm.lasso.coef@x))
+
 #get test data
 x_test <- model.matrix(emp_test$Attrition~.,emp_test[,c(cols.CatGLM)])
 #predict class, type="class"
@@ -356,7 +358,12 @@ lasso_predict[lasso_prob>.5] <- "Yes"
 #confusion matrix
 LassoLogReg <- confusionMatrix(table(pred=lasso_predict,true=emp_test$Attrition))
 LassoLogReg
+
+
 ```
+
+##### Summary Explanation:
+The following table outlines the four different models that were used in accurcy order.  As you can tell, logestic regression was the most accurate; howqever, we recommend using the logistic regression using lasso because it is more efficient. 
 
 ```{r MLSummaryModels}
 # Prediciton Models
