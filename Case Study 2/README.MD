@@ -21,7 +21,7 @@ No Specific Order:
   * CaseStudy2-data.csv - provided by CEO & CFO of Budweiser
 
 Other sources:
-  * https://plot.ly/r/line-and-scatter/
+  * http://ggobi.github.io/ggally/#customizing_the_plot
   * https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
   * http://ggplot.yhathq.com/
   * https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html
