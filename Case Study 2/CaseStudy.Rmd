@@ -91,9 +91,7 @@ pairs(emp_result[,c(21:25)], col=emp_train$Attrition)
 pairs(emp_result[,c(26:30)], col=emp_train$Attrition)
 pairs(emp_result[,c(31:35)], col=emp_train$Attrition)
 pairs(emp_result[,c(36:40)], col=emp_train$Attrition)
-
-
-#No Data in Paris
+#No Data in Plots
 #pairs(emp_result[,c(41:45)], col=emp_train$Attrition)
 #pairs(emp_result[,c(46:50)], col=emp_train$Attrition)
 #pairs(emp_result[,c(51:55)], col=emp_train$Attrition)
@@ -364,7 +362,9 @@ dt3$Type <- as.character("kWeighted")
 SummaryPred <-rbind(dt0, dt1, dt2, dt3)
 SummaryPred <- SummaryPred[order(-SummaryPred$Accuracy),]
 SummaryPred <- SummaryPred[,c(19,1:18)]
-SummaryPred  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "700px", height = "200px")
+SummaryT <- SummaryPred[,c(1,2,9, 10)]
+#SummaryPred  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "100%", height = "200px")
+SummaryT  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "100%", height = "200px")
 ```
 
 
