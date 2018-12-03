@@ -414,7 +414,8 @@ test <- emp_test
 # Test Model
 test$final.prob <- predict.glm(glm.final,emp_test[,-3],type="response")
 test$final.predicted <- ifelse(test$final.prob>.5,"Yes","No")
-confusionMatrix(table(emp_test$final.predicted, emp_test$Attrition))
+Lassofinal <- confusionMatrix(table(emp_test$final.predicted, emp_test$Attrition))
+Lassofinal
 
 ```
 
