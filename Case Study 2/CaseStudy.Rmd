@@ -368,3 +368,53 @@ SummaryT  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_wid
 ```
 
 
+```{r Logistic_Regression_Lasso Part 2}
+#Begin Logistic Regression with Lasso
+#convert training data to matrix format
+set.seed(123)
+x <- model.matrix(emp_train$Attrition~.,emp_train[,c(cols.CatGLM)])
+y <- ifelse(emp_train$Attrition=="Yes",1,0)
+glm.lasso <- cv.glmnet(x,y,alpha=1,family="binomial",type.measure = "mse")
+plot(glm.lasso)
+
+#min value of lambda
+lambda_min <- glm.lasso$lambda.min
+#best value of lambda
+lambda_1se <- glm.lasso$lambda.1se
+#regression coefficients
+glm.lasso.coef <- coef(glm.lasso,s=lambda_1se)
+data.frame(name = glm.lasso.coef@Dimnames[[1]][glm.lasso.coef@i + 1], coefficient = glm.lasso.coef@x)
+
+# Get column indecis
+cols.lasso.coef <- glm.lasso.coef@i
+cols.lasso.coef <- cols.lasso.coef[-1] # Remove the intercept
+
+train.reduce = emp_train[,cols.lasso.coef]
+train.reduce$Attrition <- emp_train$Attrition
+#names(train.reduce)
+#Assess Model
+
+glm.manual <- glm(train.reduce$Attrition~.,data = train.reduce, family = "binomial", control = list(maxit = 100))
+summary(glm.manual)
+
+#Remove N/A
+#names(train.reduce)
+# Remove N/A Fields that Do Not Help Model
+train.reduce = train.reduce[,c(-21:-28)]
+
+glm.final <- glm(train.reduce$Attrition~.,data = train.reduce, family = "binomial", control = list(maxit = 100))
+#glm.final <- glm(train.reduce$Attrition~.,data = train.reduce, family = "binomial")
+summary(glm.final)
+
+glm.final$coefficients
+exp(cbind(coef(glm.final), confint(glm.final)))
+
+test <- emp_test
+
+# Test Model
+test$final.prob <- predict.glm(glm.final,emp_test[,-3],type="response")
+test$final.predicted <- ifelse(test$final.prob>.5,"Yes","No")
+confusionMatrix(table(emp_test$final.predicted, emp_test$Attrition))
+
+```
+
