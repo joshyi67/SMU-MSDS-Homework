@@ -33,8 +33,8 @@ Other sources:
   
 # Materials
   * RMD file
-  * Raw csv file for "Beer" and "Breweries"
-  * MD file
+  * Raw csv file for "CaseStudy2" and "CaseStudy2Validation"
+  * Csv file output of label predictions
   * HTML file
   * PowerPoint
       - The Last side on the powerpoint will have the YouTube video link
