@@ -1,0 +1,370 @@
+---
+title: "Doing Data Science Case Study 2"
+author: "Joshua Yi & Grant Bourzikas"
+date: "November 24, 2018"
+output: html_document
+---
+  
+```{r loadlib, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(kableExtra)
+library(ggplot2)
+library(fpp2) 
+library(tibble)
+library(dplyr)
+library(fastDummies)
+library(GGally)
+library(glmnet)
+library(MASS)
+library(caret)
+library(pROC)
+library(ROCR)
+library(pheatmap)
+library(randomForest)
+library(mlbench)
+library(caret)
+library(class)
+library(FNN)
+library(stringr)
+library(reshape)
+library(kknn)
+library(dplyr)
+library(kableExtra)
+library(formattable)
+library(gtable)
+library(grid)
+library(gridExtra)
+library(cowplot)
+library(ggpubr)
+
+```
+
+### **Introduction**
+Yi & Bourzikas specializes in talent management solutions for Fortune 1000 companies focus on building and developing strategies for retaining employees. We specialize in workforce planning, employee training programs, identifying high-potential employees and reducing/preventing voluntary employee turnover (attrition). As part of this engagement, our data science team will predict for your organization. 
+
+```{r ReadDataIn}
+# Josh Path
+employee <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
+#Grant Path
+#employee <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+#employeeValidation <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
+result <-rbind(employee,employeeValidation)
+
+```
+
+```{r CreateDummy}
+#Create 1/0 from Catagorical Variables
+emp_train <- fastDummies::dummy_cols(employee) # Create Dummy Variables
+emp_test <- fastDummies::dummy_cols(employeeValidation) # Create Dummy Variables
+emp_result <- rbind(emp_test, emp_test) # combine train and test data sets
+```
+
+```{r CreateVariables}
+# Creating Variables
+# Define Data Colums to Make it Easier
+cols.Base <- c(2:36)
+cols.CatAttr <- c(38:39)
+cols.CatAll <- c(40:68)
+col.NoJobRole <- c(1,2,5,7,8,10,12,14,15,18,20,21,22,25:36,38:42,52:53,63:68)
+# Removed 17 From Data Set
+cols.RemoveJobRoleCat <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,66,24,25,26,27,28,29,30,31,32,33,34,35,36)
+# All Job Detailed Roles
+cols.JobRoles <- c(54:62)
+cols.AllButAttr <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,24,25,26,27,28,29,30,31,32,33,34,35,36,40,41,42,43,44,45,46,47,48,49,50,51,52,53,63,64,65,66,67,68)
+# This is all the Catagorical Fields
+cols.CatGLM <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,66,24,25,26,27,28,29,30,31,32,33,34,35,36)
+cols.CatKNN <- c(1,2,3,5,7,8,10,11,12,14,15,16,18,20,21,22,25,26,27,28,29,30,31,32,33,34,35,36,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68)
+cols.NumericAll <- c(1,2,5,7,8,10,11,12,14,15,16,18,20,21,22,25,26,27,28,29,30,31,32,33,34,35,36,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68)
+cols.Attrition <- 34
+cols.KeyFieldsBaseModel <- c(40:42,7,12,63:65,22,67:68,27,30,31:36)
+```
+
+We received the data files from your employee database and have outlined some key highlights.  The following charts are part of our exploratory data and will give your organization an idea of how different features in the data set apply.  The pair plots show all the variables based on whether your employees have left the organisation.
+
+```{r EDA}
+# Basic EDA
+#EDA - Exploratory Not for Report
+pairs(emp_result[,c(2:5)], col=emp_train$Attrition)
+pairs(emp_result[,c(6:10)], col=emp_train$Attrition)
+pairs(emp_result[,c(11:15)], col=emp_train$Attrition)
+pairs(emp_result[,c(16:20)], col=emp_train$Attrition)
+pairs(emp_result[,c(21:25)], col=emp_train$Attrition)
+pairs(emp_result[,c(26:30)], col=emp_train$Attrition)
+pairs(emp_result[,c(31:35)], col=emp_train$Attrition)
+pairs(emp_result[,c(36:40)], col=emp_train$Attrition)
+
+```
+
+####  *Heat Map Charts*
+
+Because of the data that we were able to analyze as part of the Par Plots above, we developed 2 Heat Maps and Correlations and Distribution Matrix to take a deeper dive in the data set.
+
+```{r HeatMap}
+# Heat Map for All Fields
+employeeHeatMap <- round(cor(emp_result[,c(cols.NumericAll)]),2)
+melted_employeeHeatMap <- melt(employeeHeatMap)
+ggplot(data = melted_employeeHeatMap, aes(x=X1, y=X2, fill=value)) + 
+  theme(axis.text.x  = element_blank(),axis.ticks.x=element_blank(),axis.title.x=element_blank(),axis.text.y  = element_text(size = 7))+geom_tile()
+#ggsave("images/employeeHeatMap.png",plot = last_plot(), type = png())
+# Heat Map for Key Sign Fields
+employeeHeatMapSig <- round(cor(emp_result[,c(cols.KeyFieldsBaseModel)]),2)
+melted_employeeHeatMapSig <- melt(employeeHeatMapSig)
+ggplot(data = melted_employeeHeatMapSig, aes(x=X1, y=X2, fill=value)) + 
+  theme(axis.text.x  = element_blank(),axis.ticks.x=element_blank(),axis.title.x=element_blank(),axis.text.y  = element_text(size = 7))+
+  geom_tile()
+#ggsave("images/employeeHeatMapSig.png",plot = last_plot(), type = png())
+# EDA For Key Sign Fields on Attrition for Overall Model
+ggkeySignPairs <- ggpairs(
+  mapping = ggplot2::aes(color = emp_result$Attrition),
+  emp_result[,c(cols.KeyFieldsBaseModel)], 
+  diag=list(continuous="densityDiag", discrete="barDiag"), 
+  axisLabels="show") + theme_minimal()
+#ggsave("ggkeySignPairs.png",plot = last_plot(), type = png())
+```
+
+#### *Signficant Key Factor attributing to Attirtion*
+
+Showing the significance, p-values, for each variable. This is the base information to understand the key contributors that affect attrition. This data will be used through our data science work so we can utilize the following variables for the models we build.
+
+The following table outlines the top significant factors contributing to attrition:
+
+```{r BaseGLM}
+#TrainDataSet
+glm_modeltrain <- glm(emp_train$Attrition~.,emp_train[,c(cols.CatGLM)], family = binomial) # glm train
+model_Train = data.frame(coef(summary(glm_modeltrain))[,4]) # pvalue from glm train
+names(model_Train) = "GLM Training Set" # title 
+#TestDataSet
+glm_modeltest <- glm(emp_test$Attrition~.,emp_test[,c(cols.CatGLM)], family = binomial) # glm test
+model_Test = data.frame(coef(summary(glm_modeltest))[,4]) # pvalue from glm test
+names(model_Test) = "GLM Test Set" # title
+#AllData
+glm_modelAll <- glm(emp_result$Attrition~.,emp_result[,c(cols.CatGLM)], family = binomial) # glm for all combined test and train data set
+model_All = data.frame(coef(summary(glm_modelAll))[,4]) # pvalue fro combined data set
+names(model_All) = "GLM All Set" # title
+# Table consolidated
+GLM_dataset <-cbind(model_Train, model_Test,model_All) # consolidated train, test and all data set
+# Creating kable table for GLM dataset
+GLM_dataset  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "600px", height = "450px")
+```
+
+#### *Basic Regrewssion for each Job Role*
+
+Learning about any job role specific trends that may exist in the data set is key because it tells us which variables are significant by job.  This data can be used to identify what affects will contribute to attrition rate by job. Any value that is < 0.5 is significant
+
+From the tables below, each job description will show the key attributes for attrition:
+
+```{r DetailGLM}
+# Glm for Job role - Human Resources
+glm_model_JobRoleHR <- glm(emp_result$`JobRole_Human Resources`~.,emp_result[,c(col.NoJobRole)], family = binomial) # glm
+JobRoleHR = data.frame(coef(summary(glm_model_JobRoleHR))[,4]) # pulling only pvalue from the glm
+names(JobRoleHR) = "Human Resources" # creating title
+# Glm for Job role - Manufactoring Director
+glm_model_JobRoleManufactoring <- glm(emp_result$`JobRole_Manufacturing Director`~.,emp_result[,c(col.NoJobRole)], family = binomial)# glm
+JobRoleManufactoring = data.frame(coef(summary(glm_model_JobRoleManufactoring))[,4])# pulling only pvalue from the glm
+names(JobRoleManufactoring) = "Manufacturing Director" # creating title
+# Glm for Job role - Research Scientist
+glm_model_JobRoleResearch <- glm(emp_result$`JobRole_Research Scientist`~.,emp_result[,c(col.NoJobRole)], family = binomial)# glm
+JobRoleResearch = data.frame(coef(summary(glm_model_JobRoleResearch))[,4])# pulling only pvalue from the glm
+names(JobRoleResearch) = "Research Scientist" # creating title
+# Glm for Job role - Lab Tech
+glm_model_JobRoleLab <- glm(emp_result$`JobRole_Laboratory Technician`~.,emp_result[,c(col.NoJobRole)], family = binomial)# glm
+JobRoleLab = data.frame(coef(summary(glm_model_JobRoleLab))[,4])# pulling only pvalue from the glm
+names(JobRoleLab) = "Laboratory Technician" # creating title
+# Glm for Job role - Research Director
+glm_model_JobRoleResearchDirector <- glm(emp_result$`JobRole_Research Director`~.,emp_result[,c(col.NoJobRole)], family = binomial)# glm
+JobRoleRD = data.frame(coef(summary(glm_model_JobRoleResearchDirector))[,4])# pulling only pvalue from the glm
+names(JobRoleRD) = "Research Director" # creating title
+# Glm for Job role - Sales Exec
+glm_model_JobRoleSalesExec <- glm(emp_result$`JobRole_Sales Executive`~.,emp_result[,c(col.NoJobRole)], family = binomial)# glm
+JobRoleSE = data.frame(coef(summary(glm_model_JobRoleSalesExec))[,4])# pulling only pvalue from the glm
+names(JobRoleSE) = "Sales Executive" # creating title
+# Glm for Job role - Sales Person
+glm_model_JobRoleSalesPerson <- glm(emp_result$`JobRole_Sales Representative`~.,emp_result[,c(col.NoJobRole)], family = binomial)# glm
+JobRoleSP = data.frame(coef(summary(glm_model_JobRoleSalesPerson))[,4])# pulling only pvalue from the glm
+names(JobRoleSP) = "Sales Representative" # creating title
+# Glm for Job role - Manager
+glm_model_JobRoleManager <- glm(emp_result$JobRole_Manager~.,emp_result[,c(col.NoJobRole)], family = binomial)# glm
+JobRoleManager = data.frame(coef(summary(glm_model_JobRoleManager))[,4])# pulling only pvalue from the glm
+names(JobRoleManager) = "Manager" # creating title
+# Glm for Job role - HealthCare
+glm_model_JobRoleHealth <- glm(emp_result$`JobRole_Healthcare Representative`~.,emp_result[,c(col.NoJobRole)], family = binomial)# glm
+JobRoleHealthR = data.frame(coef(summary(glm_model_JobRoleHealth))[,4])# pulling only pvalue from the glm
+names(JobRoleHealthR) = "Healthcare Representative" # creating title
+# Gener by Job Role
+glm_model_Gender  <- glm(emp_train$Gender~.,emp_train[,c(cols.JobRoles)], family = binomial)# glm
+Gender_Model = data.frame(coef(summary(glm_model_Gender))[,4])# pulling only pvalue from the glm
+names(Gender_Model) = "Gender" # creating title
+# Marital Status by Role
+glm_model_Marital  <- glm(emp_train$MaritalStatus~.,emp_train[,c(cols.JobRoles)], family = binomial)# glm
+Marital_Model = data.frame(coef(summary(glm_model_Marital))[,4])# pulling only pvalue from the glm
+names(Marital_Model) = "Marital Status" # creating title
+# Consolidated all the job role glm
+Table.glm <-cbind(JobRoleHR, JobRoleManufactoring,JobRoleResearch,JobRoleLab,JobRoleRD,JobRoleSE,JobRoleManager)
+# kable output for the consolidated glm
+Table.glm  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "800px", height = "450px")
+# kable output for the Gender by Job Role glm
+Gender_Model  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "500px", height = "450px")
+# kable output for the Martial Status Role glm
+Marital_Model  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "500px", height = "450px")
+```
+#### *KNN Model*
+
+Running the full KNN model using the training and test data set. The full KNN model came out to have a high accuracy rate of 84%, from there we decided to run the KNN model by job role. The glm showed us that each job has different variables of significance, so the KNN by job reflects different variables that pertains to that specific role.
+
+As a key note, KNN works better with larger data sets than splitting them into job positions.
+
+```{r KNN}
+# KNN
+set.seed(123)
+#knn.train = train(Attrition~., data=emp_train[,c(cols.CatKNN)], method="knn", trControl=control, tuneGrid=grid1)
+knn.train = train(Attrition~., data=emp_train[,c(cols.CatKNN)], method="knn")
+knn.train
+#Set K=18 sq of 1480
+knn.test = knn(emp_train[,c(cols.CatKNN)][,-3], emp_test[,c(cols.CatKNN)][,-3], emp_train[,c(cols.CatKNN)][,3], k=18)
+knnPrediction <-confusionMatrix(table(knn.test, emp_test$Attrition))
+knnPrediction
+```
+
+#### *KNN Weighted*
+Running the Weighted KNN model using the training and test data set. The Weighted KNN model came out to have a higher accuracy rate of 84.4 than the KNN which was 84%. Additional, the plot below shows the optimal K which is 30.
+
+```{r KWeighted}
+# K Weighted
+set.seed(123)
+#performs leave-one-out crossvalidation 
+kknn.train = train.kknn(Attrition~., data=emp_train[,c(cols.CatKNN)], kmax=30, distance = 2)
+#Predict Attribution
+prediction <- predict(kknn.train, emp_test[,c(cols.CatKNN)][,-3])
+#Show Confusion Matrix
+kWeightedPrediction <- confusionMatrix(table(emp_test[,c(cols.CatKNN)][,3],prediction))
+kWeightedPrediction
+# Plot Prediction for number of K
+graphics.off() 
+par(mar=c(5,5,5,5))
+plot(kknn.train)
+```
+#### *Logistic_Regression*
+
+The following model is logistic regression the test and training set for all the fields.  For logistic regression to work, the data was formatted to numeric data and setup with a prediction interval in which we converted a probability. In this model, we predicted at an 87% rate.
+
+
+```{r Logistic_Regression}
+# Logistic Regression (No Lasso)
+#predict probabilities on testset
+#type="response" gives probabilities, type="class" gives class
+glm_prob <- predict.glm(glm_modeltrain,emp_test[,-3],type="response")
+#which classes do these probabilities refer to? What are 1 and 0?
+contrasts(emp_test$Attrition)
+#make predictions
+##.first create vector to hold predictions (we know 0 refers to neg now)
+glm_predict <- rep("No",nrow(emp_test))
+glm_predict[glm_prob>.5] <- "Yes"
+#confusion matrix
+LogRegOnly <-confusionMatrix(table(pred=glm_predict,true=emp_test$Attrition))
+LogRegOnly
+```
+
+### *Logistic_Regression Using Lasso - For  Bonus*
+Adding to the the Logistic Regression model above, Logistic Regression Using Lasso was used for automated feature selection. As part of this model, we discovered that only 6 variables predict at 86% vs general logistic regression of 87% that utilizes all fields in the data set.  Because the Logistic_Regression Using Lasso is more efficient, our recommendation is to run the logistic regression model using LASSO because it is more efficient and only 1% less prediction.
+
+Just because Lasso was used as a feature selection, it is essential to Validate the numbers that come out of the LASSO model. From the Automated LASSO feature selection, it was discovered through down selects that there is a better model.
+
+```{r LR_Bonus}
+#Begin Logistic Regression with Lasso
+#convert training data to matrix format
+set.seed(123)
+x <- model.matrix(emp_train$Attrition~.,emp_train[,c(cols.CatGLM)])
+y <- ifelse(emp_train$Attrition=="Yes",1,0)
+# Run Base Model
+glm.lasso.new <- cv.glmnet(x,y,alpha=1,family="binomial",type.measure = "mse")
+plot(glm.lasso.new)
+#min value of lambda
+lambda_min <- glm.lasso.new$lambda.min
+#best value of lambda
+lambda_1se <- glm.lasso.new$lambda.1se
+#regression coefficients
+glm.lasso.new.coef <- coef(glm.lasso.new,s=lambda_1se)
+data.frame(name = glm.lasso.new.coef@Dimnames[[1]][glm.lasso.new.coef@i + 1], coefficient = glm.lasso.new.coef@x)
+# Get column indecis
+cols.lasso.coef <- glm.lasso.new.coef@i
+cols.lasso.coef <- cols.lasso.coef[-1] # Remove the intercept
+train.reduce = emp_train[,cols.lasso.coef]
+train.reduce = train.reduce[,-20]
+#Assess Model
+glm.assess <- glm(Attrition~.,data = train.reduce, family = "binomial")
+summary(glm.assess)
+# Remove Non-Sign Variables
+index <- c(2,4,7,9,10,11,13,15:19)
+train.reduce.final <- train.reduce[,index]
+glm.finalversion <- glm(train.reduce$Attrition~.,data = train.reduce.final, family = "binomial")
+summary(glm.finalversion)
+#Remove Monthly Rate
+train.reduce.final.version <- train.reduce.final[,-6]
+#Reassess Model 
+glm.finalfinal <- glm(train.reduce$Attrition~.,data = train.reduce.final.version, family = "binomial")
+summary(glm.finalfinal)
+glm.finalfinal$coefficients
+exp(cbind(coef(glm.finalfinal), confint(glm.finalfinal)))
+# Test Model
+test <- emp_test
+test$final.prob <- predict.glm(glm.finalfinal,test[,-3],type="response")
+test$final.predicted <- ifelse(test$final.prob>.5,"Yes","No")
+Lassofinal <- confusionMatrix(table(test$final.predicted, test$Attrition))
+Lassofinal
+```
+
+##### Summary Explanation:
+The following table outlines the four different models that were used in accuracy order.  As you can tell, logistic regression was the most accurate; however, we recommend using the logistic regression using lasso because it is more efficient. 
+
+```{r MLSummaryModels}
+# Prediciton Models
+# Review Prediciton Models
+LogRegOnly # Log Regression
+Lassofinal # LogRessions with Lasso
+knnPrediction # kNN 
+kWeightedPrediction # K Weighted
+# Create Prediction Summary Table
+dt0 <- data.frame(cbind(t(LogRegOnly$overall),t(LogRegOnly$byClass)))
+dt0$Type <- as.character("LogRegOnly")
+dt1 <- data.frame(cbind(t(knnPrediction$overall),t(knnPrediction$byClass)))
+dt1$Type <- as.character("kNN")
+dt3 <- data.frame(cbind(t(kWeightedPrediction$overall),t(kWeightedPrediction$byClass)))
+dt3$Type <- as.character("kWeighted")
+dt4 <- data.frame(cbind(t(Lassofinal$overall),t(Lassofinal$byClass)))
+dt4$Type <- as.character("Lassofinal")
+SummaryPred <-rbind(dt0, dt1, dt3, dt4)
+SummaryPred <- SummaryPred[order(-SummaryPred$Accuracy),]
+SummaryPred <- SummaryPred[,c(19,1:18)]
+SummaryT <- SummaryPred[,c(1,2,9, 10)]
+#SummaryPred  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "100%", height = "200px")
+SummaryT  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_width = F) %>% scroll_box(width = "100%", height = "200px")
+```
+
+```{r Write_CSV}
+# Josh Path
+dfTrain <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "Null")
+dfVal <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "Null")
+#Grant Path
+#dfTrain <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
+#dfTest <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
+
+dfTrain2 <- fastDummies::dummy_cols(dfTrain) # Create Dummy Variables
+dfVal2 <- fastDummies::dummy_cols(dfVal) # Create Dummy
+
+Col.KNN <- c(2,5,7,8,10,11,12,14,15,16,18,20,21,22,25,26,27,28,29,30,31,32,33,34,35,36,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68)
+
+# KNN
+set.seed(1)
+fit = train(Attrition~., data=dfTrain2[,c(cols.CatKNN)], method="knn")
+
+dfVal$Predictions = predict(fit,dfVal2)
+
+dfPreds = data.frame(dfVal$ID,dfVal$Predictions)
+colnames(dfPreds) = c("ID","Prediction")
+dfPreds
+
+write.csv(dfPreds,file = "LabelPrediction.csv",row.names = FALSE)
+
+
+```
