@@ -36,6 +36,7 @@ library(grid)
 library(gridExtra)
 library(cowplot)
 library(ggpubr)
+
 ```
 
 ### **Introduction**
@@ -49,6 +50,7 @@ employeeValidation <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseS
 #employee <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
 #employeeValidation <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 result <-rbind(employee,employeeValidation)
+
 ```
 
 ```{r CreateDummy}
@@ -223,50 +225,7 @@ knn.test = knn(emp_train[,c(cols.CatKNN)][,-3], emp_test[,c(cols.CatKNN)][,-3], 
 knnPrediction <-confusionMatrix(table(knn.test, emp_test$Attrition))
 knnPrediction
 ```
-```{r KNN_JobRole}
-# HR KNN
-Job_HRTrain = emp_train %>% filter(JobRole == 'Human Resources')# Train set by job
-Job_HRTest = emp_test %>% filter(JobRole == 'Human Resources')# Test set by job
-pred_HR = class::knn(Job_HRTrain[,c(8,25,27,42)],Job_HRTest[,c(8,25,27,42)],Job_HRTrain$Attrition, k= 4) # using knn
-Job_HRTest$HR_Pred = factor(pred_HR) # creating a new column for knn prediction
-pred_HRAttrition = confusionMatrix(table(factor(Job_HRTest$HR_Pred), Job_HRTest$Attrition))
-# Manufacturing Director KNN
-Job_MDTrain = emp_train %>% filter(JobRole == 'Manufacturing Director')# Train set by job
-Job_MDTest = emp_test %>% filter(JobRole == 'Manufacturing Director')# Test set by job
-pred_MD = class::knn(Job_MDTrain[,c(8,22,25,27,42)],Job_MDTest[,c(8,22,25,27,42)],Job_MDTrain$Attrition, k= 3) # KNN classifcation function at k = 3
-Job_MDTest$MD_Pred = pred_MD # creating a new column for knn prediction
-pred_HRAttrition = confusionMatrix(table(Job_MDTest$MD_Pred, Job_MDTest$Attrition))
-# Research Scientist KNN
-Job_RSTrain = emp_train %>% filter(JobRole == 'Research Scientist') # Train set by job
-Job_RSTest = emp_test %>% filter(JobRole == 'Research Scientist') # Test set by job
-pred_RS = class::knn(Job_RSTrain[,c(8,12,14,20,21,33,34,40)],Job_RSTest[,c(8,12,14,20,21,33,34,40)],Job_RSTrain$Attrition, k = 3) # using knn
-Job_RSTest$RS_Pred = factor(pred_RS) # creating a new column for knn prediction
-pred_RSAttrition = confusionMatrix(table(factor(Job_RSTest$RS_Pred),Job_RSTest$Attrition)) # running confusion Matrix
-# Laboratory Technician KNN
-Job_LTTrain = emp_train %>% filter(JobRole == 'Laboratory Technician')# Train set by job
-Job_LTTest = emp_test %>% filter(JobRole == 'Laboratory Technician')# Test set by job
-pred_LT = class::knn(Job_LTTrain[,c(12,20,26,27,53)],Job_LTTest[,c(12,20,26,27,53)],Job_LTTrain$Attrition, k= 3) # using knn
-Job_LTTest$LT_Pred = factor(pred_LT)  # creating a new column for knn prediction
-pred_LTAttrition = confusionMatrix(table(factor(Job_LTTest$LT_Pred),Job_LTTest$Attrition)) # running confusion Matrix
-# Sales Executive KNN - .8088
-Job_SETrain = emp_train %>% filter(JobRole == 'Sales Executive')
-Job_SETest = emp_test %>% filter(JobRole == 'Sales Executive')
-pred_SE = class::knn(Job_SETrain[,c(12,20,27,30,36)],Job_SETest[,c(12,20,27,30,36)],Job_SETrain$Attrition, k= 3) # KNN classifcation function at k = 3
-Job_SETest$SE_Pred = factor(pred_SE) # inserting into column at testTX2
-pred_SEAttrition = confusionMatrix(table(factor(Job_SETest$SE_Pred), Job_SETest$Attrition)) # running confusion Matrix at k = 3
-# Sales Representative KNN - .3889
-Job_SRTrain = emp_train %>% filter(JobRole == 'Sales Representative')
-Job_SRTest = emp_test %>% filter(JobRole == 'Sales Representative')
-pred_SR = class::knn(Job_SRTrain[,c(2,5,42,12,53,15,65,20,21,25,26,30,31,32,34,35)],Job_SRTest[,c(2,5,42,12,53,15,65,20,21,25,26,30,31,32,34,35)],Job_SRTrain$Attrition, k= 3) # KNN classifcation function at k = 3
-Job_SRTest$SR_Pred = factor(pred_SR) # inserting into column at testTX2
-pred_SRAttrition = confusionMatrix(table(factor(Job_SRTest$SR_Pred), Job_SRTest$Attrition)) # running confusion Matrix at k = 3
-# Healthcare Representative KNN - .3889
-Job_HealthTrain = emp_train %>% filter(JobRole == 'Healthcare Representative')
-Job_HealthTest = emp_test %>% filter(JobRole == 'Healthcare Representative')
-pred_Health = class::knn(Job_HealthTrain[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTest[,c(2,52,14,63,64,27,30,34,35,36)],Job_HealthTrain$Attrition, k= 3) # KNN classifcation function at k = 3
-Job_HealthTest$Health_Pred = factor(pred_Health) # inserting into column at testTX2
-pred_HealthAttrition = confusionMatrix(table(Job_HealthTest$Health_Pred, Job_HealthTest$Attrition)) # running confusion Matrix at k = 3
-```
+
 #### *KNN Weighted*
 Running the Weighted KNN model using the training and test data set. The Weighted KNN model came out to have a higher accuracy rate of 84.4 than the KNN which was 84%. Additional, the plot below shows the optimal K which is 30.
 
@@ -385,26 +344,27 @@ SummaryT  %>%  kable() %>% kable_styling(bootstrap_options = "striped", full_wid
 ```{r Write_CSV}
 # Josh Path
 dfTrain <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2-data.csv", na.strings = "Null")
-dfTest <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "Null")
+dfVal <- read.csv("E:/Documents/School/MSDS 6306/Case Study 2/CaseStudy2Validation.csv", na.strings = "Null")
 #Grant Path
 #dfTrain <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2-data.csv", na.strings = "NULL")
 #dfTest <- read.csv("/Users/gbourzik/OneDrive - McAfee/Documents/SMU/6306 - DDS - F18/Case_Final2/SMU-MSDS-Homework/Case Study 2/CaseStudy2Validation.csv", na.strings = "NULL")
 
 dfTrain2 <- fastDummies::dummy_cols(dfTrain) # Create Dummy Variables
-dfTest2 <- fastDummies::dummy_cols(dfTest) # Create Dummy
+dfVal2 <- fastDummies::dummy_cols(dfVal) # Create Dummy
 
 Col.KNN <- c(2,5,7,8,10,11,12,14,15,16,18,20,21,22,25,26,27,28,29,30,31,32,33,34,35,36,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68)
 
 # KNN
 set.seed(1)
-fit2 = class::knn(dfTrain2[,c(Col.KNN)],dfTest2[,c(Col.KNN)],dfTrain2$Attrition, k= 3)
 fit = train(Attrition~., data=dfTrain2[,c(cols.CatKNN)], method="knn")
 
-dfTest$Predictions = factor(fit2) # creating a new column for knn prediction
-#dfVal$Predictions = predict(fit2,dfTest2)
+dfVal$Predictions = predict(fit,dfVal2)
 
-#dfPreds = data.frame(dfVal$ID,dfVal$Attrition,dfVal$Predictions)
-dfPreds = confusionMatrix(table(factor(fit2), dfTest$Attrition))
+dfPreds = data.frame(dfVal$ID,dfVal$Predictions)
+colnames(dfPreds) = c("ID","Prediction")
 dfPreds
+
+write.csv(dfPreds,file = "LabelPrediction.csv",row.names = FALSE)
+
 
 ```
