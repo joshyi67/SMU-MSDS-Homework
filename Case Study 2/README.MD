@@ -8,10 +8,10 @@ Case Study 2 assignment detail:
 
 # Usage
 
-  * _CaseStudy1.Rmd and .md contains the rmarkdown report
+  * _CaseStudy2.Rmd contains the rmarkdown report
   * CaseStudy2Validation.csv training dataset
   * CaseStudy2-data.csv test dataset
-  * _CaseStudy1.html is the html output
+  * _CaseStudy2.html is the html output
   * Powerpoint is for report out purpose and also contains YouTube video link of the presentation
 
 # Sources
@@ -34,7 +34,7 @@ Other sources:
 # Materials
   * RMD file
   * Raw csv file for "CaseStudy2" and "CaseStudy2Validation"
-  * Csv file output of label predictions
+  * Csv file output of label predictions and Table for JobRole
   * HTML file
   * PowerPoint
       - The Last side on the powerpoint will have the YouTube video link
